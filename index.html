@@ -33,7 +33,7 @@ h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin
 .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center;width:100%;padding:20px 0 40px}
 @media(max-width:820px){.hero{grid-template-columns:1fr;gap:18px;padding:10px 0 30px}}
 .hero img.wm{width:min(560px,100%);height:auto;display:block;filter:drop-shadow(0 10px 22px rgba(28,32,48,.16))}
-.hero .pfp{width:min(400px,64vw);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 30px 40px rgba(28,32,48,.22));animation:bob 5s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-10px)}}@media(prefers-reduced-motion:reduce){.hero .pfp{animation:none}}
+.hero .pfp{width:min(320px,56vw);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 30px 40px rgba(28,32,48,.22));animation:bob 5s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-10px)}}@media(prefers-reduced-motion:reduce){.hero .pfp{animation:none}}
 .pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
 .pill{border:1px solid var(--hair);background:var(--card);border-radius:999px;padding:9px 14px;font-size:12.5px;color:var(--dim);display:inline-flex;align-items:center;gap:8px}
 .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--mute)}.pill.on .dot{background:var(--green);box-shadow:0 0 8px var(--green)}.pill.busy .dot{background:var(--orange);box-shadow:0 0 8px var(--orange)}
@@ -125,11 +125,6 @@ h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin
 <section id="top" class="sec"><div class="wrap hero">
   <div>
     <img class="wm" src="/assets/wordmark.png" alt="INTERN" width="1008" height="248">
-    <div class="pills">
-      <span class="pill" id="st"><span class="dot"></span><span id="stT">clocking in</span></span>
-      <span class="pill">next <code id="nextK">—</code> in <code id="cd">--:--:--</code></span>
-      <span class="pill">rehearsals <code id="cyc">0</code></span>
-    </div>
     <button class="go" id="enter">Into the office <i>▾</i></button>
   </div>
   <img class="pfp" src="/assets/intern.png" alt="" width="648" height="900">
@@ -198,7 +193,7 @@ $('#enter').onclick=function(){$('#office').scrollIntoView({behavior:'smooth'})}
 var LOG=[];function log(txt,me){var el=$('#log');$('#logz').hidden=true;var e=document.createElement('div');e.className='e'+(me?' me':'');var n=new Date();e.innerHTML='<time>'+String(n.getUTCHours()).padStart(2,'0')+':'+String(n.getUTCMinutes()).padStart(2,'0')+'z</time><span></span>';e.lastChild.textContent=txt;el.appendChild(e);el.scrollTop=el.scrollHeight;LOG.push(txt)}
 // ---- status (hero pill + room chip)
 function setState(s,n){var map={idle:['on','at my desk · waiting for the vote'],reading:['busy','reading the board'],buying:['busy','placing the buy'],printing:['busy','printing the receipt'],delivering:['busy','handing it out'],coffee:['on','coffee run'],done:['on','day done · rehearsal '+n]};var m=map[s]||['on',s];
-  $('#st').className='pill '+m[0];$('#status').className='status '+m[0];$('#stT').textContent=m[1];$('#stT2').textContent=m[1];if(s==='done')$('#cyc').textContent=n;if(PANEL==='holes'||PANEL==='printer')panel(PANEL)}
+  $('#status').className='status '+m[0];$('#stT2').textContent=m[1];if(PANEL==='holes'||PANEL==='printer')panel(PANEL)}
 // ---- votes (rehearsal, in memory)
 var VOTES={};function votes(){return VOTES}
 function fmt(n){return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -224,7 +219,7 @@ function panel(kind){var P=$('#panel'),B=$('#pB'),F=$('#pF');if(!kind){P.classLi
 $('#pX').onclick=function(){if(OFFICE)OFFICE.unfocus();panel(null)};
 function runDay(){if(!OFFICE)return;if(OFFICE.busy){$('#stT2').textContent='busy — give me a minute';return}OFFICE.runDay(1000);if(PANEL==='board')panel(null);OFFICE.unfocus();$('#office').scrollIntoView({behavior:'smooth'})}
 $('#run').addEventListener('click',runDay);
-fetch('/api/quote').then(function(r){return r.json()}).then(function(j){Q=j;$('#vList').textContent=j.list.join(' · ');office()}).catch(function(){$('#stT').textContent='could not read my list';$('#stT2').textContent='could not read my list_';log('could not read my list. I will try again.',true)});
+fetch('/api/quote').then(function(r){return r.json()}).then(function(j){Q=j;$('#vList').textContent=j.list.join(' · ');office()}).catch(function(){$('#stT2').textContent='could not read my list_';log('could not read my list. I will try again.',true)});
 function office(){import('/assets/office.js?v='+V).then(function(mod){OFFICE=mod.startOffice({box:$('#room'),Q:Q,fmt:fmt,log:log,votes:votes,onState:setState,onFocus:function(w){panel(w)}});window.__office=OFFICE;setState('idle')}).catch(function(e){$('#stT2').textContent='my office could not load here: '+(e&&e.message||e)})}
 // ---- the day strip: real UTC, stops placed by their time of day
 (function(){var stops=[].slice.call(document.querySelectorAll('.stop')),now=$('#now'),fill=$('#railFill');
@@ -234,7 +229,7 @@ function tick(){var n=new Date(),m=n.getUTCHours()*60+n.getUTCMinutes()+n.getUTC
   var nxt=null,lastDone=null;stops.forEach(function(s){var sm=+s.dataset.h*60+ +s.dataset.m,done=m>=sm;s.classList.toggle('done',done);s.classList.remove('next');if(done)lastDone=s;if(!done&&!nxt)nxt=s});
   if(!nxt)nxt=stops[0];nxt.classList.add('next');var sm=+nxt.dataset.h*60+ +nxt.dataset.m;var secs=Math.round(((sm-m)+(sm<=m?1440:0))*60);
   var cd=String(Math.floor(secs/3600)).padStart(2,'0')+':'+String(Math.floor(secs%3600/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');var k=nxt.dataset.k;
-  $('#cd').textContent=cd;$('#cd2').textContent=cd;$('#nextK').textContent=k;$('#nextK2').textContent=k;
+  $('#cd2').textContent=cd;$('#nextK2').textContent=k;
   fill.style.left=X(0)+'%';fill.style.width=lastDone?(parseFloat(lastDone.style.left)-X(0))+'%':'0'}
 tick();setInterval(tick,1000)})();
 // ---- reveal + scroll spy
