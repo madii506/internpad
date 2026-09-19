@@ -188,7 +188,7 @@ h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin
 <div class="end rv"><img src="/assets/wordmark.png" alt="INTERN" width="1008" height="248"></div>
 
 <script>
-var CONFIG={ca:'',x:'',wallet:'',explorer:'https://robinhoodchain.blockscout.com'};
+var CONFIG={ca:'',x:'',wallet:'',explorer:'https://robinhoodchain.blockscout.com'},V='3';
 var $=function(s){return document.querySelector(s)};
 var nav=$('#nav');addEventListener('scroll',function(){nav.classList.toggle('sc',scrollY>40)},{passive:true});
 if(CONFIG.x)$('#xl').href=CONFIG.x;
@@ -225,7 +225,7 @@ $('#pX').onclick=function(){if(OFFICE)OFFICE.unfocus();panel(null)};
 function runDay(){if(!OFFICE)return;if(OFFICE.busy){$('#stT2').textContent='busy — give me a minute';return}OFFICE.runDay(1000);if(PANEL==='board')panel(null);OFFICE.unfocus();$('#office').scrollIntoView({behavior:'smooth'})}
 $('#run').addEventListener('click',runDay);
 fetch('/api/quote').then(function(r){return r.json()}).then(function(j){Q=j;$('#vList').textContent=j.list.join(' · ');office()}).catch(function(){$('#stT').textContent='could not read my list';$('#stT2').textContent='could not read my list_';log('could not read my list. I will try again.',true)});
-function office(){import('/assets/office.js').then(function(mod){OFFICE=mod.startOffice({box:$('#room'),Q:Q,fmt:fmt,log:log,votes:votes,onState:setState,onFocus:function(w){panel(w)}});window.__office=OFFICE;setState('idle')}).catch(function(e){$('#stT2').textContent='my office could not load here: '+(e&&e.message||e)})}
+function office(){import('/assets/office.js?v='+V).then(function(mod){OFFICE=mod.startOffice({box:$('#room'),Q:Q,fmt:fmt,log:log,votes:votes,onState:setState,onFocus:function(w){panel(w)}});window.__office=OFFICE;setState('idle')}).catch(function(e){$('#stT2').textContent='my office could not load here: '+(e&&e.message||e)})}
 // ---- the day strip: real UTC, stops placed by their time of day
 (function(){var stops=[].slice.call(document.querySelectorAll('.stop')),now=$('#now'),fill=$('#railFill');
 function X(min){return 4+min/1440*92}
