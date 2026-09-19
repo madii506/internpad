@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INTERN</title>
+<meta name="description" content="I'm the intern. Every day you vote on one stock, I buy it with $INTERN fees and hand it to everyone holding. Nothing to claim.">
+<meta property="og:title" content="INTERN"><meta property="og:description" content="Tell him what to buy. He buys it with $INTERN fees and hands it to every holder. Every day. Unpaid."><meta property="og:image" content="/assets/og.jpg"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png"><link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png"><link rel="apple-touch-icon" href="/assets/favicon-180.png">
+<style>
+@font-face{font-family:Inter;src:url(/assets/inter.woff2) format('woff2');font-weight:100 900;font-display:swap}
+@font-face{font-family:Plex;src:url(/assets/plexmono.woff2) format('woff2');font-weight:400 700;font-display:swap}
+:root{--paper:#e9ebe6;--line:#d3d6d0;--ink:#1c2030;--dim:#5b616e;--mute:#8a8f99;--blue:#2b56c9;--blue2:#3e74e8;--orange:#f07a1a;--green:#2f9e5b;--red:#c8332b;--card:rgba(255,255,255,.72);--hair:rgba(28,32,48,.14)}
+*{box-sizing:border-box}html{overflow-x:hidden;scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}[hidden]{display:none!important}button{font-family:inherit}
+.mono{font-family:Plex,ui-monospace,monospace}
+#paper{position:fixed;inset:-80px;z-index:-1;pointer-events:none;background-color:var(--paper);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;animation:drift 40s linear infinite}
+#paper:after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.55),rgba(255,255,255,0) 55%),radial-gradient(ellipse at 80% 90%,rgba(28,32,48,.10),rgba(28,32,48,0) 60%)}
+@keyframes drift{to{background-position:40px 40px}}
+@media(prefers-reduced-motion:reduce){#paper{animation:none}}
+.wrap{max-width:1180px;margin:0 auto;padding-left:32px;padding-right:32px}
+@media(max-width:640px){.wrap{padding-left:20px;padding-right:20px}}
+nav{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:60px;padding:0 24px;transition:background .3s,box-shadow .3s}
+nav.sc{background:rgba(233,235,230,.86);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--hair)}
+nav ul{list-style:none;margin:0;padding:0;display:flex;gap:26px;justify-content:center;grid-column:2}
+nav a{font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--dim);padding:4px 0;border-bottom:2px solid transparent}nav a:hover,nav a.on{color:var(--ink);border-color:var(--orange)}
+@media(max-width:640px){nav ul{gap:14px}nav a{font-size:12px}}
+.sec{position:relative;padding:72px 0;scroll-margin-top:60px;border-top:1px solid var(--hair)}
+@media(max-width:640px){.sec{padding:48px 0}}
+h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin:0 0 24px;line-height:1.05}
+.eb{font-family:Plex,monospace;font-size:11px;letter-spacing:.12em;color:var(--mute);margin-bottom:10px}
+/* office */
+#office{padding:0;border-top:0;scroll-margin-top:60px}
+.room{position:relative;width:100vw;margin-left:calc(50% - 50vw);height:calc(100vh - 60px);min-height:560px;max-height:900px;overflow:hidden;touch-action:none;user-select:none;cursor:grab}
+.room.drag{cursor:grabbing}
+#gl{position:absolute;inset:0}#gl canvas{display:block}
+#ov{position:absolute;inset:0;pointer-events:none}
+.brand{position:absolute;left:28px;top:22px;z-index:5;pointer-events:none}
+.brand img{display:block;width:min(300px,42vw);height:auto;filter:drop-shadow(0 6px 14px rgba(28,32,48,.18))}
+.status{position:absolute;left:34px;top:calc(22px + min(300px,42vw)*.246 + 10px);z-index:5;font-family:Plex,monospace;font-size:12px;color:var(--dim);display:flex;align-items:center;gap:8px;pointer-events:none}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.status.on .dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+.status.busy .dot{background:var(--orange);box-shadow:0 0 8px var(--orange)}
+.msg{position:absolute;transform:translate(-50%,-100%);background:#fff;color:var(--ink);border:1px solid var(--hair);border-radius:12px;padding:7px 11px;font-size:12.5px;font-weight:600;white-space:nowrap;box-shadow:0 10px 24px rgba(28,32,48,.16);pointer-events:none;animation:msg 3.8s forwards;z-index:5}
+.msg:after{content:'';position:absolute;left:50%;top:100%;border:6px solid transparent;border-top-color:#fff;transform:translateX(-50%)}
+.msg b{font-weight:800}.msg i{font-style:normal;font-family:Plex,monospace;font-size:9.5px;letter-spacing:.08em;color:var(--mute);margin-left:6px}
+@keyframes msg{0%{opacity:0;transform:translate(-50%,-90%) scale(.9)}8%{opacity:1;transform:translate(-50%,-100%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-115%)}}
+.msg.win{background:#fff;border:1px solid var(--blue);padding:0;overflow:hidden;border-radius:6px;font-family:Plex,monospace;font-weight:600;animation-duration:4.2s}
+.msg.win:before{content:'BUY ORDER';display:block;background:linear-gradient(#3e74e8,#2b56c9);color:#fff;font:700 10px Inter,sans-serif;letter-spacing:.1em;padding:4px 10px}
+.msg.win{padding-bottom:0}.msg.win b{display:inline-block;padding:8px 0 8px 10px;color:var(--green)}.msg.win i{display:inline-block;padding-right:10px}
+.msg.win:after{border-top-color:var(--blue)}
+.msg.plus{background:transparent;border:0;color:var(--green);box-shadow:none;font-family:Plex,monospace;font-weight:700;animation:plus 1.5s forwards;padding:0}.msg.plus:after{display:none}
+@keyframes plus{0%{opacity:0;transform:translate(-50%,-100%)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-260%)}}
+.ballot{position:absolute;left:24px;bottom:24px;z-index:6;width:300px;max-width:calc(100% - 48px);background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--hair);border-radius:16px;padding:12px 12px 8px;box-shadow:0 14px 34px rgba(28,32,48,.14)}
+.ballot h5{margin:0 4px 8px;font:700 10.5px Plex,monospace;letter-spacing:.12em;color:var(--mute);display:flex;justify-content:space-between}.ballot h5 i{font-style:normal;color:var(--ink)}
+.ballot .l{max-height:min(300px,38vh);overflow:auto;scrollbar-width:thin}
+.bt{display:grid;grid-template-columns:54px 1fr 64px 26px;gap:8px;align-items:center;width:100%;border:0;background:none;padding:7px 6px;border-radius:9px;cursor:pointer;text-align:left;font-family:Plex,monospace;font-size:12px;color:var(--ink)}
+.bt:hover{background:rgba(43,86,201,.08)}.bt.lead{background:rgba(240,122,26,.12)}
+.bt b{font-weight:700}.bt em{display:block;height:5px;border-radius:3px;background:rgba(28,32,48,.1);overflow:hidden}.bt em s{display:block;height:100%;background:var(--blue);width:0;transition:width .5s}.bt.lead em s{background:var(--orange)}
+.bt .px{text-align:right;color:var(--dim)}.bt .px.up{color:var(--green)}.bt .px.dn{color:var(--red)}.bt .n{text-align:right;color:var(--mute)}
+.bt.hit{animation:hit .45s}@keyframes hit{30%{transform:scale(1.03)}}
+.ballot .f{margin:6px 4px 0;font-family:Plex,monospace;font-size:10.5px;color:var(--mute);display:flex;justify-content:space-between}
+.ctl{position:absolute;right:20px;bottom:20px;display:flex;gap:6px;z-index:6;align-items:center}
+.ctl button{height:38px;border-radius:10px;border:1px solid var(--hair);background:var(--card);backdrop-filter:blur(8px);color:var(--ink);font:700 15px Inter,sans-serif;cursor:pointer;padding:0 12px;min-width:38px}.ctl button:hover{background:var(--ink);color:#fff}
+.ctl .go{background:var(--ink);color:#fff;font-size:13px;padding:0 16px}.ctl .go:hover{background:var(--blue)}
+.foc{font-family:Plex,monospace;font-size:11px;color:var(--dim);margin-right:6px;background:var(--card);border:1px solid var(--hair);border-radius:999px;padding:6px 10px}
+.room.focus{cursor:zoom-out}.ballot{transition:transform .5s,opacity .5s}.room.focus .ballot{transform:translateY(calc(100% + 40px));opacity:0;pointer-events:none}
+@media(max-width:640px){.ballot{width:calc(100% - 40px);left:20px;bottom:74px;padding:10px 8px 6px}.ballot .l{max-height:150px}.ctl{right:14px;bottom:14px}.ctl .go{position:absolute;right:0;bottom:44px}}
+/* day */
+.rail{position:relative;margin:34px 0 10px;height:150px}
+.rail .ln{position:absolute;left:0;right:0;top:64px;height:2px;background:var(--hair)}
+.rail .fill{position:absolute;left:0;top:64px;height:2px;background:var(--orange);width:0;transition:width 1s linear}
+.stop{position:absolute;top:0;transform:translateX(-50%);text-align:center;width:150px}
+.stop .k{font-family:Plex,monospace;font-size:12px;color:var(--mute)}
+.stop .d{width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--mute);margin:10px auto}
+.stop.done .d{background:var(--orange);border-color:var(--orange)}.stop.next .d{border-color:var(--ink);box-shadow:0 0 0 5px rgba(240,122,26,.18)}
+.stop h4{margin:0;font-size:15px;font-weight:800}
+.stop p{margin:4px 0 0;color:var(--dim);font-size:12.5px;line-height:1.35}
+.now{position:absolute;top:44px;transform:translateX(-50%);width:2px;height:42px;background:var(--ink)}
+.now:after{content:attr(data-t);position:absolute;top:44px;left:50%;transform:translateX(-50%);font-family:Plex,monospace;font-size:11px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 4px}
+@media(max-width:700px){.rail{height:auto;margin-top:10px}.rail .ln,.rail .fill,.now{display:none}.stop{position:static;transform:none;width:auto;text-align:left;display:grid;grid-template-columns:70px 14px 1fr;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--hair)}.stop .d{margin:3px 0 0}.stop .k{padding-top:2px}.stop p{grid-column:3}}
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.pill{border:1px solid var(--hair);background:var(--card);border-radius:999px;padding:9px 14px;font-size:12.5px;color:var(--dim);display:inline-flex;align-items:center;gap:8px}
+.pill code{font-family:Plex,monospace;color:var(--ink);font-size:12.5px}
+/* rules */
+.rules{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 40px}
+.rules li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:16px 0;border-bottom:1px solid var(--hair);font-size:16px;line-height:1.45;align-items:baseline}
+.rules li i{font-style:normal;font-family:Plex,monospace;font-size:12px;color:var(--mute)}.rules li b{font-weight:800}.rules li span{color:var(--dim);display:block;font-size:14px}
+/* verify */
+.two{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:30px;align-items:start}
+@media(max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.rows{border-top:1px solid var(--hair)}
+.vr{display:grid;grid-template-columns:120px 1fr auto;gap:14px;align-items:center;padding:16px 0;border-bottom:1px solid var(--hair);font-size:15px}
+@media(max-width:640px){.vr{grid-template-columns:1fr;gap:6px}}
+.vr .k{font-family:Plex,monospace;font-size:11px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.vr .v{font-family:Plex,monospace;font-size:13px;color:var(--dim);overflow-wrap:anywhere}
+.vr .v.z:after{content:'_';animation:blink 1s steps(1,end) infinite}@keyframes blink{50%{opacity:0}}
+.vr a{font-size:12.5px;color:var(--ink);border:1px solid var(--hair);background:var(--card);border-radius:999px;padding:6px 12px}
+.log{min-width:0;overflow-wrap:anywhere;background:#fff;border:1px solid var(--hair);border-radius:16px;padding:16px 18px;font-family:Plex,monospace;font-size:12.5px;line-height:1.7;color:var(--dim);max-height:420px;overflow:auto;box-shadow:0 10px 30px rgba(28,32,48,.08)}
+.log h5{margin:0 0 10px;font:700 10.5px Plex,monospace;letter-spacing:.12em;color:var(--mute)}
+.log .e{display:grid;grid-template-columns:62px 1fr;gap:10px}.log .e time{color:var(--mute)}.log .e.me{color:var(--ink)}.log .z{color:var(--mute)}
+.rv{opacity:0;transform:translateY(14px);transition:opacity .6s,transform .6s}.rv.vis{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+.end{padding:30px 0 70px;text-align:center}.end img{width:min(260px,50vw);height:auto;display:block;margin:0 auto}
+</style>
+</head>
+<body>
+<div id="paper"></div>
+<nav id="nav"><ul>
+<li><a href="#office">Office</a></li><li><a href="#day">Day</a></li><li><a href="#rules">Rules</a></li><li><a href="#verify">Verify</a></li><li><a href="docs.html">Docs</a></li><li><a id="xl" href="https://x.com/" target="_blank" rel="noopener">X</a></li>
+</ul></nav>
+
+<section id="office" class="sec">
+  <div class="room" id="room">
+    <div id="gl"></div><div id="ov"></div>
+    <div class="brand"><img src="/assets/wordmark.png" alt="INTERN" width="1008" height="248"></div>
+    <div class="status" id="status"><span class="dot"></span><span id="stT">clocking in_</span></div>
+    <div class="ballot" id="ballot"><h5>TODAY'S VOTE <i id="bTot">SIM</i></h5><div class="l" id="bList"><div class="f">reading my list_</div></div><div class="f"><span>click a stock to vote · rehearsal</span><span id="bClose">closes 15:30 UTC</span></div></div>
+    <div class="ctl"><span class="foc" id="foc" hidden></span><button class="go" id="run">Run today ▸</button><button id="zIn" aria-label="zoom in">+</button><button id="zOut" aria-label="zoom out">−</button><button id="zRst" aria-label="reset">⌂</button></div>
+  </div>
+</section>
+
+<section id="day" class="sec"><div class="wrap">
+  <div class="eb rv">01 — MY DAY, UTC</div>
+  <h2 class="rv">Same four things. Every weekday.</h2>
+  <div class="rail rv" id="rail">
+    <div class="ln"></div><div class="fill" id="railFill"></div>
+    <div class="stop" data-h="9" data-m="0" style="left:8%"><div class="k">09:00</div><div class="d"></div><h4>Vote opens</h4><p>sign, no gas · weighted by balance</p></div>
+    <div class="stop" data-h="15" data-m="30" style="left:38%"><div class="k">15:30</div><div class="d"></div><h4>Result posted</h4><p>before I touch anything</p></div>
+    <div class="stop" data-h="15" data-m="35" style="left:64%"><div class="k">15:35</div><div class="d"></div><h4>I buy</h4><p>quote · guard · dry-run · swap</p></div>
+    <div class="stop" data-h="15" data-m="40" style="left:90%"><div class="k">15:40</div><div class="d"></div><h4>I send</h4><p>90% to holders · not a claim</p></div>
+    <div class="now" id="now" data-t="now"></div>
+  </div>
+  <div class="pills rv"><span class="pill">next <code id="nextK">—</code> in <code id="cd">--:--:--</code></span><span class="pill">days worked <code id="days">0</code></span><span class="pill">rehearsals <code id="cyc">0</code></span></div>
+</div></section>
+
+<section id="rules" class="sec"><div class="wrap">
+  <div class="eb rv">02 — WHAT I CAN'T DO</div>
+  <h2 class="rv">Boxed in on purpose.</h2>
+  <ul class="rules rv">
+    <li><i>01</i><div><b>I never sell.</b><span>there is no sell function</span></div></li>
+    <li><i>02</i><div><b>Only holders get paid.</b><span>I can't send anywhere else</span></div></li>
+    <li><i>03</i><div><b>Only from my list.</b><span>tokenized stocks with a USDG pool</span></div></li>
+    <li><i>04</i><div><b>Result before buy.</b><span>the post always comes first</span></div></li>
+    <li><i>05</i><div><b>90 / 10.</b><span>90% to you, 10% gas and hosting, printed daily</span></div></li>
+    <li><i>06</i><div><b>Nobody votes, nobody guesses.</b><span>I re-buy yesterday's winner</span></div></li>
+    <li><i>07</i><div><b>Price past my guard, I wait.</b><span>the pot rolls to tomorrow</span></div></li>
+    <li><i>08</i><div><b>Rules behind a timelock.</b><span>in the contract, not a prompt</span></div></li>
+  </ul>
+</div></section>
+
+<section id="verify" class="sec"><div class="wrap">
+  <div class="eb rv">03 — CHECK ME</div>
+  <h2 class="rv">Three links a day.</h2>
+  <div class="two">
+    <div class="rows rv">
+      <div class="vr"><span class="k">token</span><span class="v z" id="vCa">not deployed yet</span><span></span></div>
+      <div class="vr"><span class="k">my wallet</span><span class="v z" id="vW">not created yet</span><span></span></div>
+      <div class="vr"><span class="k">my list</span><span class="v" id="vList">—</span><a href="#office">the board</a></div>
+      <div class="vr"><span class="k">my key</span><span class="v">one key signs the swap and the transfers. boxed in by the contract, this page and a timelock. still one key.</span><span></span></div>
+      <div class="vr"><span class="k">each day</span><span class="v">the vote result, the swap, the distribution — three links, or no day.</span><a href="docs.html">docs</a></div>
+    </div>
+    <div class="log rv" id="log"><h5>MY DAY</h5><div class="z" id="logz">day 1. nothing to report yet_</div></div>
+  </div>
+</div></section>
+
+<div class="end rv"><img src="/assets/wordmark.png" alt="INTERN" width="1008" height="248"></div>
+
+<script>
+var CONFIG={ca:'',x:'',wallet:'',explorer:'https://robinhoodchain.blockscout.com'};
+var $=function(s){return document.querySelector(s)};
+var nav=$('#nav');addEventListener('scroll',function(){nav.classList.toggle('sc',scrollY>40)},{passive:true});
+if(CONFIG.x)$('#xl').href=CONFIG.x;
+if(CONFIG.wallet){var vw=$('#vW');vw.classList.remove('z');vw.textContent=CONFIG.wallet;var a=document.createElement('a');a.href=CONFIG.explorer+'/address/'+CONFIG.wallet;a.target='_blank';a.rel='noopener';a.textContent='explorer ↗';vw.parentNode.lastElementChild.replaceWith(a)}
+// ---- log
+var LOG=[];function log(txt,me){var el=$('#log');$('#logz').hidden=true;var e=document.createElement('div');e.className='e'+(me?' me':'');var n=new Date();e.innerHTML='<time>'+String(n.getUTCHours()).padStart(2,'0')+':'+String(n.getUTCMinutes()).padStart(2,'0')+'z</time><span></span>';e.lastChild.textContent=txt;el.appendChild(e);el.scrollTop=el.scrollHeight;LOG.push(txt)}
+// ---- status
+var ST=$('#status'),STT=$('#stT');
+function setState(s,n){var map={idle:['on','at my desk · waiting for the vote'],reading:['busy','reading the board'],buying:['busy','placing the buy'],printing:['busy','printing the receipt'],delivering:['busy','handing it out'],coffee:['on','coffee run'],done:['on','day done · rehearsal '+n]};var m=map[s]||['on',s];ST.className='status '+m[0];STT.textContent=m[1];if(s==='done')$('#cyc').textContent=n}
+// ---- votes (rehearsal, in memory)
+var VOTES={};function votes(){return VOTES}
+function fmt(n){return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+var Q=null,OFFICE=null;
+function ballot(){var L=Q.list,max=1,tot=0;L.forEach(function(t){var n=VOTES[t]||0;tot+=n;if(n>max)max=n});var lead=null,ln=0;L.forEach(function(t){if((VOTES[t]||0)>ln){ln=VOTES[t];lead=t}});
+  var order=L.slice().sort(function(a,b){return (VOTES[b]||0)-(VOTES[a]||0)||L.indexOf(a)-L.indexOf(b)});
+  $('#bList').innerHTML=order.map(function(t){var q=Q.quotes[t],ch=(q.price-q.prev)/q.prev*100,n=VOTES[t]||0;return '<button class="bt'+(t===lead?' lead':'')+'" data-t="'+t+'"><b>'+t+'</b><em><s style="width:'+(n?Math.max(6,n/max*100):0)+'%"></s></em><span class="px '+(ch>=0?'up':'dn')+'">'+(ch>=0?'+':'')+ch.toFixed(2)+'%</span><span class="n">'+(n||'—')+'</span></button>'}).join('');
+  $('#bTot').textContent=tot?tot+' VOTES · SIM':'SIM';
+  $('#bList').querySelectorAll('.bt').forEach(function(b){b.onclick=function(){var t=b.dataset.t;VOTES[t]=(VOTES[t]||0)+1;ballot();var nb=$('#bList').querySelector('.bt[data-t='+t+']');if(nb){nb.classList.add('hit')}if(OFFICE)OFFICE.voted(t);log('you voted '+t+' · rehearsal · a real vote is a wallet signature weighted by balance',false)}})}
+fetch('/api/quote').then(function(r){return r.json()}).then(function(j){Q=j;$('#vList').textContent=j.list.join(' · ');ballot();office()}).catch(function(){$('#bList').innerHTML='<div class="f">could not read my list. retrying next cycle_</div>';log('could not read my list. I will try again.',true)});
+function office(){import('/assets/office.js').then(function(mod){OFFICE=mod.startOffice({box:$('#room'),Q:Q,fmt:fmt,log:log,votes:votes,onState:setState,onFocus:function(n){var h=$('#foc');h.hidden=!n;if(n)h.textContent=n+' · ⌂ back'}});window.__office=OFFICE;setState('idle')}).catch(function(e){STT.textContent='my office could not load here: '+(e&&e.message||e)})}
+$('#run').addEventListener('click',function(){if(!OFFICE)return;if(OFFICE.busy){STT.textContent='busy — give me a minute';return}OFFICE.runDay(1000);$('#office').scrollIntoView({behavior:'smooth'})});
+// ---- the day rail: real UTC, stops placed by their time of day
+(function(){var stops=[].slice.call(document.querySelectorAll('.stop')),now=$('#now'),fill=$('#railFill'),cd=$('#cd'),nk=$('#nextK');
+function X(min){return 6+min/1440*88}
+stops.forEach(function(s){s.style.left=X(+s.dataset.h*60+ +s.dataset.m)+'%'});
+function tick(){var n=new Date(),m=n.getUTCHours()*60+n.getUTCMinutes()+n.getUTCSeconds()/60;now.style.left=X(m)+'%';now.dataset.t=String(n.getUTCHours()).padStart(2,'0')+':'+String(n.getUTCMinutes()).padStart(2,'0')+'z';
+  var nxt=null,lastDone=null;stops.forEach(function(s){var sm=+s.dataset.h*60+ +s.dataset.m,done=m>=sm;s.classList.toggle('done',done);s.classList.remove('next');if(done)lastDone=s;if(!done&&!nxt)nxt=s});
+  if(!nxt)nxt=stops[0];nxt.classList.add('next');var sm=+nxt.dataset.h*60+ +nxt.dataset.m;var secs=Math.round(((sm-m)+(sm<=m?1440:0))*60);
+  cd.textContent=String(Math.floor(secs/3600)).padStart(2,'0')+':'+String(Math.floor(secs%3600/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');nk.textContent=nxt.querySelector('h4').textContent.toLowerCase();
+  fill.style.left=X(0)+'%';fill.style.width=lastDone?(parseFloat(lastDone.style.left)-X(0))+'%':'0'}
+tick();setInterval(tick,1000)})();
+// ---- reveal + scroll spy
+(function(){var els=document.querySelectorAll('.rv');var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting)e.target.classList.add('vis')})},{threshold:.08});els.forEach(function(e){io.observe(e)});
+function sweep(){els.forEach(function(e){var r=e.getBoundingClientRect();if(r.top<innerHeight)e.classList.add('vis')})}addEventListener('scroll',sweep,{passive:true});setInterval(sweep,700);sweep();
+var links=[].slice.call(document.querySelectorAll('nav a')).filter(function(a){return a.getAttribute('href').charAt(0)==='#'});
+function spy(){var y=scrollY+120,cur=null;links.forEach(function(a){var s=$(a.getAttribute('href'));if(s&&s.offsetTop<=y)cur=a});links.forEach(function(a){a.classList.toggle('on',a===cur)})}addEventListener('scroll',spy,{passive:true});spy();})();
+</script>
+</body>
+</html>
