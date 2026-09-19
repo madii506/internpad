@@ -41,8 +41,10 @@ h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin
 .go{display:inline-flex;align-items:center;gap:10px;margin-top:28px;height:52px;padding:0 22px;border-radius:14px;background:var(--ink);color:#fff;font-weight:800;font-size:15px;border:0;cursor:pointer;box-shadow:0 14px 30px rgba(28,32,48,.18)}
 .go:hover{background:var(--blue)}.go i{font-style:normal;font-family:Plex,monospace;font-size:12px;opacity:.7}
 /* the office: one long module */
-#office{padding:0;border-top:1px solid var(--hair);scroll-margin-top:60px}
-.room{position:relative;width:100vw;margin-left:calc(50% - 50vw);height:calc(100vh - 60px);min-height:600px;max-height:980px;overflow:hidden;touch-action:none;user-select:none;cursor:grab}
+#office{padding:28px 0 40px;border-top:1px solid var(--hair);scroll-margin-top:60px}
+.room{position:relative;width:100%;height:560px;border-radius:20px;border:1px solid var(--hair);box-shadow:0 20px 50px rgba(28,32,48,.10);overflow:hidden;touch-action:none;user-select:none;cursor:grab;transition:height .4s,border-radius .4s}
+.room.big{width:100vw;margin-left:calc(50% - 50vw);height:calc(100vh - 60px);min-height:600px;border-radius:0;border:0}
+@media(max-width:640px){.room{height:520px}}
 .room.drag{cursor:grabbing}.room.focus{cursor:zoom-out}
 #gl{position:absolute;inset:0}#gl canvas{display:block}
 #ov{position:absolute;inset:0;pointer-events:none}#ov .hot{pointer-events:auto}
@@ -91,7 +93,7 @@ h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin
 .strip .stop .d{width:10px;height:10px;border-radius:50%;background:var(--paper);border:2px solid var(--mute)}
 .strip .stop.done .d{background:var(--orange);border-color:var(--orange)}.strip .stop.next .d{border-color:var(--ink);box-shadow:0 0 0 4px rgba(240,122,26,.18)}
 .strip .stop span{font-size:11px;white-space:nowrap;color:var(--dim)}.strip .stop.next span{color:var(--ink);font-weight:700}
-.strip .now{position:absolute;top:8px;bottom:8px;width:2px;background:var(--ink);transform:translateX(-50%)}
+.strip .now{position:absolute;top:10px;height:50%;width:2px;background:var(--ink);transform:translateX(-50%)}.strip .now:after{content:'now';position:absolute;top:-2px;left:6px;font-size:9px;color:var(--ink)}
 .strip .k{white-space:nowrap}.strip .k code{font-family:Plex,monospace;color:var(--ink)}
 @media(max-width:700px){.hot{font-size:9.5px;padding:5px 8px}.strip{grid-template-columns:1fr auto;gap:10px;height:52px}.strip .rail{display:none}.ctl{bottom:66px}.panel{bottom:66px;top:64px;width:calc(100% - 36px)}}
 /* rules */
@@ -130,17 +132,17 @@ h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin
   <img class="pfp" src="/assets/intern.png" alt="" width="648" height="900">
 </div></section>
 
-<section id="office" class="sec">
+<section id="office" class="sec"><div class="wrap">
   <div class="room" id="room">
     <div id="gl"></div><div id="ov"></div>
     <div class="status" id="status"><span class="dot"></span><span id="stT2">clocking in_</span></div>
     <div class="panel" id="panel"><h5><span id="pT">—</span><span><i id="pI"></i> <button id="pX" aria-label="close">✕</button></span></h5><div class="body" id="pB"></div><div class="foot" id="pF"></div></div>
-    <div class="ctl"><button class="run" id="run">Run today ▸</button><button id="zIn" aria-label="zoom in">+</button><button id="zOut" aria-label="zoom out">−</button><button id="zRst" aria-label="reset">⌂</button></div>
+    <div class="ctl"><button class="run" id="run">Run today ▸</button><button id="zIn" aria-label="zoom in">+</button><button id="zOut" aria-label="zoom out">−</button><button id="zRst" aria-label="reset">⌂</button><button id="big" aria-label="bigger">⤢</button></div>
     <div class="strip" id="strip">
       <span class="k">my day · utc</span>
       <div class="rail" id="rail"><div class="ln"></div><div class="fill" id="railFill"></div>
-        <div class="stop" data-h="9" data-m="0" data-k="vote opens"><div class="d"></div><span>09:00 vote opens</span></div>
-        <div class="stop" data-h="15" data-m="30" data-k="result"><div class="d"></div><span>15:30 result · 15:35 buy · 15:40 send</span></div>
+        <div class="stop" data-h="9" data-m="0" data-k="vote opens"><div class="d"></div><span>09:00 vote</span></div>
+        <div class="stop" data-h="15" data-m="30" data-k="result"><div class="d"></div><span>15:30 result · buy · send</span></div>
         <div class="stop" data-h="15" data-m="35" data-k="buy"><div class="d"></div></div>
         <div class="stop" data-h="15" data-m="40" data-k="send"><div class="d"></div></div>
         <div class="now" id="now"></div>
@@ -148,7 +150,7 @@ h2{font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-.02em;margin
       <span class="k">next <code id="nextK2">—</code> in <code id="cd2">--:--:--</code></span>
     </div>
   </div>
-</section>
+</div></section>
 
 <section id="rules" class="sec"><div class="wrap">
   <div class="eb rv">01 — WHAT I CAN'T DO</div>
@@ -219,6 +221,7 @@ function panel(kind){var P=$('#panel'),B=$('#pB'),F=$('#pF');if(!kind){P.classLi
 $('#pX').onclick=function(){if(OFFICE)OFFICE.unfocus();panel(null)};
 function runDay(){if(!OFFICE)return;if(OFFICE.busy){$('#stT2').textContent='busy — give me a minute';return}OFFICE.runDay(1000);if(PANEL==='board')panel(null);OFFICE.unfocus();$('#office').scrollIntoView({behavior:'smooth'})}
 $('#run').addEventListener('click',runDay);
+$('#big').onclick=function(){var r=$('#room'),on=r.classList.toggle('big');$('#big').textContent=on?'⤡':'⤢';setTimeout(function(){dispatchEvent(new Event('resize'))},420);if(on)r.scrollIntoView({behavior:'smooth',block:'start'})};
 fetch('/api/quote').then(function(r){return r.json()}).then(function(j){Q=j;$('#vList').textContent=j.list.join(' · ');office()}).catch(function(){$('#stT2').textContent='could not read my list_';log('could not read my list. I will try again.',true)});
 function office(){import('/assets/office.js?v='+V).then(function(mod){OFFICE=mod.startOffice({box:$('#room'),Q:Q,fmt:fmt,log:log,votes:votes,onState:setState,onFocus:function(w){panel(w)}});window.__office=OFFICE;setState('idle')}).catch(function(e){$('#stT2').textContent='my office could not load here: '+(e&&e.message||e)})}
 // ---- the day strip: real UTC, stops placed by their time of day
