@@ -51,6 +51,29 @@ export function startOffice(o){
   // framed badge: employee of the month, day 1
   mesh(BOX(1.5,1.9,.08),M(0x3a2a1e),-8.2,4.2,-RD/2+.14).castShadow=false;const frameMat=new THREE.MeshStandardMaterial({roughness:.7});const framed=mesh(BOX(1.3,1.7,.02),frameMat,-8.2,4.2,-RD/2+.2);framed.castShadow=false;
 
+  // ---------- LED ticker along the top of the walls ----------
+  const tickC=document.createElement('canvas');tickC.width=2048;tickC.height=64;const tc=tickC.getContext('2d');
+  const tickTex=new THREE.CanvasTexture(tickC);tickTex.colorSpace=THREE.SRGBColorSpace;tickTex.wrapS=THREE.RepeatWrapping;tickTex.magFilter=THREE.LinearFilter;
+  function drawTicker(){tc.fillStyle='#0b0f1a';tc.fillRect(0,0,2048,64);tc.font='bold 30px IBM Plex Mono, DejaVu Sans Mono, monospace';tc.textBaseline='middle';let x=20;
+    LIST.forEach(tk=>{const q=Q.quotes[tk],ch=(q.price-q.prev)/q.prev*100;tc.fillStyle='#f5f5f0';tc.fillText(tk,x,32);x+=tc.measureText(tk).width+14;tc.fillStyle='#ffb020';tc.fillText(fmt(q.price),x,32);x+=tc.measureText(fmt(q.price)).width+14;tc.fillStyle=ch>=0?'#39c66d':'#e05252';const t=(ch>=0?'▲':'▼')+Math.abs(ch).toFixed(2)+'%';tc.fillText(t,x,32);x+=tc.measureText(t).width+44});
+    tickTex.repeat.set(1,1);tickTex.needsUpdate=true}
+  drawTicker();
+  const tickMat=new THREE.MeshStandardMaterial({map:tickTex,emissiveMap:tickTex,emissive:0xffffff,emissiveIntensity:.9,roughness:.5});
+  const tickBack=mesh(BOX(RW-.4,.62,.12),tickMat,0,6.35,-RD/2+.12);tickBack.castShadow=false;
+  const tickLeft=mesh(BOX(.12,.62,RD-.4),new THREE.MeshStandardMaterial({map:tickTex,emissiveMap:tickTex,emissive:0xffffff,emissiveIntensity:.9,roughness:.5}),-RW/2+.12,6.35,0);tickLeft.castShadow=false;
+  mesh(BOX(RW-.3,.72,.08),mat.ink,0,6.35,-RD/2+.06).castShadow=false;mesh(BOX(.08,.72,RD-.3),mat.ink,-RW/2+.06,6.35,0).castShadow=false;
+
+  // ---------- TV on the left wall: the leader's day ----------
+  const tvC=document.createElement('canvas');tvC.width=512;tvC.height=288;const tv=tvC.getContext('2d');const tvTex=new THREE.CanvasTexture(tvC);tvTex.colorSpace=THREE.SRGBColorSpace;
+  mesh(BOX(.14,2.0,3.4),mat.mon,-RW/2+.27,3.9,.2).castShadow=false;const tvScr=mesh(BOX(.04,1.8,3.2),new THREE.MeshStandardMaterial({map:tvTex,emissiveMap:tvTex,emissive:0xffffff,emissiveIntensity:.75,roughness:.4}),-RW/2+.36,3.9,.2);tvScr.castShadow=false;tvScr.rotation.y=0;
+  function drawTV(tk){tk=tk||topMover();const q=Q.quotes[tk],ch=(q.price-q.prev)/q.prev*100,c=q.closes&&q.closes.length>1?q.closes:[q.prev,q.price];
+    tv.fillStyle='#0f1a2e';tv.fillRect(0,0,512,288);tv.fillStyle='#16233d';for(let i=1;i<6;i++)tv.fillRect(0,48*i,512,1);
+    tv.fillStyle='#fff';tv.font='bold 30px IBM Plex Mono, DejaVu Sans Mono, monospace';tv.textAlign='left';tv.textBaseline='alphabetic';tv.fillText(tk,18,40);tv.fillStyle='#9fb3d9';tv.font='18px Inter, DejaVu Sans, sans-serif';tv.fillText(q.name,18,64);
+    tv.fillStyle='#fff';tv.font='bold 28px IBM Plex Mono, DejaVu Sans Mono, monospace';tv.textAlign='right';tv.fillText(fmt(q.price),494,40);tv.fillStyle=ch>=0?'#39c66d':'#e05252';tv.font='bold 20px IBM Plex Mono, DejaVu Sans Mono, monospace';tv.fillText((ch>=0?'+':'')+ch.toFixed(2)+'%',494,64);
+    const lo=Math.min(...c),hi=Math.max(...c),r=(hi-lo)||1;tv.beginPath();c.forEach((v,i)=>{const x=24+i/(c.length-1)*464,y=250-(v-lo)/r*150;i?tv.lineTo(x,y):tv.moveTo(x,y)});tv.strokeStyle=ch>=0?'#39c66d':'#e05252';tv.lineWidth=4;tv.lineJoin='round';tv.stroke();
+    tv.lineTo(488,262);tv.lineTo(24,262);tv.closePath();tv.fillStyle=ch>=0?'rgba(57,198,109,.15)':'rgba(224,82,82,.15)';tv.fill();
+    tv.fillStyle='#6a7a9a';tv.font='14px IBM Plex Mono, DejaVu Sans Mono, monospace';tv.textAlign='left';tv.fillText(q.live?'live · yahoo finance':'snapshot '+q.asof,18,280);tvTex.needsUpdate=true}
+
   // ---------- the vote board on the back wall ----------
   const boardC=document.createElement('canvas');boardC.width=1024;boardC.height=640;const bx=boardC.getContext('2d');
   const boardTex=new THREE.CanvasTexture(boardC);boardTex.colorSpace=THREE.SRGBColorSpace;
@@ -94,11 +117,12 @@ export function startOffice(o){
   mesh(BOX(1.2,.5,.9),M(0xd9d9d4),0,1.3,0,printer);mesh(BOX(.9,.06,.5),mat.ink,0,1.57,0,printer);
   const slip=mesh(BOX(.5,.01,.001),mat.paper,0,1.42,.5,printer);slip.visible=false;
 
+  function labelTex(t){const c=document.createElement('canvas');c.width=128;c.height=32;const x=c.getContext('2d');x.fillStyle='#f6f4ec';x.fillRect(0,0,128,32);x.fillStyle='#333';x.font='bold 17px IBM Plex Mono, DejaVu Sans Mono, monospace';x.textAlign='center';x.textBaseline='middle';x.fillText(t,64,17);const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;return tx}
   // ---------- pigeonholes (holders) on the back wall ----------
   const holes=[];const cab=new THREE.Group();cab.position.set(5.5,0,-RD/2+.5);scene.add(cab);
   const HC=6,HR=4,HW=.95,HH=.72;mesh(BOX(HC*HW+.2,HR*HH+.2,.9),mat.cab,0,1.0+HR*HH/2,0,cab);
   for(let r=0;r<HR;r++)for(let c=0;c<HC;c++){const x=(c-(HC-1)/2)*HW,y=1.0+.1+r*HH+HH/2-.02;const h=mesh(BOX(HW-.12,HH-.12,.8),new THREE.MeshStandardMaterial({color:0x8e887a,roughness:.9,emissive:0xf07a1a,emissiveIntensity:0}),x,y,.08,cab);h.castShadow=false;
-    const tag=mesh(BOX(.5,.14,.02),mat.paper,x,y-HH/2+.2,.5,cab);tag.castShadow=false;holes.push({m:h,pos:new THREE.Vector3(cab.position.x+x,y,cab.position.z+.5),flash:0})}
+    const id='0x'+((r*HC+c)*2654435761>>>0).toString(16).padStart(8,'0').slice(0,4)+'…'+((r*HC+c+7)*40503>>>0).toString(16).slice(-2);const tag=mesh(BOX(.62,.16,.02),new THREE.MeshStandardMaterial({map:labelTex(id),roughness:.9}),x,y-HH/2+.2,.5,cab);tag.castShadow=false;holes.push({m:h,id:id,pos:new THREE.Vector3(cab.position.x+x,y,cab.position.z+.5),flash:0,got:[]})}
   mesh(BOX(HC*HW+.2,.12,1.0),mat.cabD,0,1.0,0,cab);
   // water cooler + plant
   const cool=new THREE.Group();cool.position.set(8.6,0,-1.8);scene.add(cool);mesh(BOX(.7,2.2,.7),M(0xdcdcd8),0,1.1,0,cool);mesh(CYL(.32,.36,1.0,20),mat.water,0,2.7,0,cool);mesh(SPH(.36,20,14),mat.water,0,3.2,0,cool);mesh(BOX(.1,.14,.16),mat.blue,.3,1.7,.4,cool);
@@ -136,7 +160,8 @@ export function startOffice(o){
     const paper=mesh(BOX(.5,.01,.7),mat.paper,0,.02,0,hold);paper.visible=false;
     g.scale.setScalar(.95);
     return {g,head,armL,armR,legs,eyes,hold,tray,parcel,paper}}
-  const I=intern();scene.add(I.g);frameMat.map=badgeTex();frameMat.needsUpdate=true;
+  const I=intern();scene.add(I.g);drawTV(null);
+  [['board','VOTE',-.5,6.55,-6.9],['desk','BUY ORDERS',-7,3.5,0],['holes','HOLDERS',5.5,4.5,-6.4],['printer','RECEIPTS',-7.2,2.25,-4.6]].forEach(a=>{const el=document.createElement('button');el.className='hot';el.dataset.w=a[0];el.textContent=a[1];el.dataset.x=a[2];el.dataset.y=a[3];el.dataset.z=a[4];el.onclick=()=>{const f=FOCUS.find(f=>f.what===a[0]);if(f)focus(f)};ov.appendChild(el)});frameMat.map=badgeTex();frameMat.needsUpdate=true;
   // ---------- a coworker who wanders through ----------
   const boss=intern();boss.g.traverse(m=>{if(m.material===mat.shirt)m.material=M(0x4a5568);if(m.material===mat.hair)m.material=M(0x8a8a86)});boss.g.scale.setScalar(1.08);boss.g.position.set(-RW/2-1.5,0,4);boss.g.visible=false;scene.add(boss.g);
   let bossSt='away',bossT=30000+Math.random()*20000,bossFrom=null,bossTo=null;
@@ -156,7 +181,7 @@ export function startOffice(o){
   const parcels=[];const parcelGeo=new THREE.BoxGeometry(.28,.2,.2);
 
   // ---------- the day, as a state machine ----------
-  let st='idle',t=0,from=null,to=null,face=0,queue=[],cur=null,cycles=0,lastAuto=0,idleTimer=0,typing=0;
+  let st='idle',t=0,from=null,to=null,face=0,queue=[],cur=null,cycles=0,lastAuto=0,idleTimer=0,typing=0;const RECEIPTS=[],DIST=[];
   const speed=3.2;
   function walkTo(spot,then){queue.push({kind:'walk',spot:spot});if(then)queue.push({kind:'do',fn:then})}
   function wait(ms,fn){queue.push({kind:'wait',ms:ms,fn:fn})}
@@ -164,14 +189,14 @@ export function startOffice(o){
   function topMover(){return LIST.slice().sort((a,b)=>{const qa=Q.quotes[a],qb=Q.quotes[b];return (qb.price-qb.prev)/qb.prev-(qa.price-qa.prev)/qa.prev})[0]}
   function runDay(potUSDG){if(cur)return false;const L=leader(),tk=L.tk,q=Q.quotes[tk],pot=potUSDG||1000,toYou=pot*.9,shares=toYou/q.price,n=Math.min(holes.length,8+Math.floor(Math.random()*8)),each=shares/n;cur={tk,q,pot,toYou,shares,n,each,why:L.why};
     onState('reading');
-    walkTo('board',()=>{WIN=tk;drawBoard();I.head.rotation.x=-.25;say('<b>'+tk+'</b> '+(L.n?'wins with '+L.n+(L.n>1?' votes':' vote'):'— no votes yet, so today it\'s the top mover')+'<i>SIM</i>',3200);log('vote closed. '+tk+' — '+L.why+'. I post before I buy.',true)});
+    walkTo('board',()=>{WIN=tk;drawBoard();drawTV(tk);I.head.rotation.x=-.25;say('<b>'+tk+'</b> '+(L.n?'wins with '+L.n+(L.n>1?' votes':' vote'):'— no votes yet, so today it\'s the top mover')+'<i>SIM</i>',3200);log('vote closed. '+tk+' — '+L.why+'. I post before I buy.',true)});
     wait(2600,()=>{I.head.rotation.x=0;onState('buying')});
     walkTo('desk',()=>{typing=2200;I.armL.rotation.x=-1.0;I.armR.rotation.x=-1.0});
     wait(1400,()=>{drawMon(shares.toFixed(4)+' '+tk+' @ '+fmt(q.price));const p=new THREE.Vector3(-7,3.3,0);pop(p,'<b>BUY</b> '+shares.toFixed(4)+' '+tk+' at '+fmt(q.price)+' · '+toYou.toLocaleString('en-US')+' USDG<i>SIM</i>','win',4200);log('SIM · bought '+shares.toFixed(4)+' '+tk+' at '+fmt(q.price)+' with '+toYou.toLocaleString('en-US')+' USDG (90% of a '+pot.toLocaleString('en-US')+' USDG pot). quote, guard, dry-run, swap. nothing moved.',true)});
     wait(1200,()=>{I.armL.rotation.x=0;I.armR.rotation.x=0;slip.visible=true;slip.scale.y=1;slip.position.z=.5;onState('printing')});
     walkTo('printer',()=>{slip.visible=false;I.paper.visible=true;I.armL.rotation.x=-.7;I.armR.rotation.x=-.7;say('receipt<i>SIM</i>',1500)});
     wait(700,()=>{I.paper.visible=false;I.parcel.visible=true;onState('delivering')});
-    walkTo('holes',()=>{const picks=holes.slice().sort(()=>Math.random()-.5).slice(0,n);picks.forEach((h,i)=>{parcels.push({m:null,a:I.g.position.clone().add(new THREE.Vector3(0,1.4,.6)),b:h.pos.clone(),t:-i*.22,h:h});setTimeout(()=>{if(i<4||i===n-1)pop(h.pos.clone().add(new THREE.Vector3(0,.45,0)),'+'+each.toFixed(4)+' '+tk,'plus',1600)},i*220+900)});
+    walkTo('holes',()=>{const picks=holes.slice().sort(()=>Math.random()-.5).slice(0,n);RECEIPTS.unshift({tk,shares:+shares.toFixed(4),price:q.price,pot,n,each:+each.toFixed(4),t:Date.now(),why:L.why});picks.forEach((h,i)=>{h.got.unshift({tk,each:+each.toFixed(4),t:Date.now()});DIST.unshift({id:h.id,tk,each:+each.toFixed(4),t:Date.now()});parcels.push({m:null,a:I.g.position.clone().add(new THREE.Vector3(0,1.4,.6)),b:h.pos.clone(),t:-i*.22,h:h});setTimeout(()=>{if(i<4||i===n-1)pop(h.pos.clone().add(new THREE.Vector3(0,.45,0)),'+'+each.toFixed(4)+' '+tk,'plus',1600)},i*220+900)});
       say('<b>'+each.toFixed(4)+' '+tk+'</b> each · '+n+' wallets<i>SIM</i>',3400);log('SIM · sent '+each.toFixed(4)+' '+tk+' to each of '+n+' wallets by balance. not a claim. a transfer. nothing moved.',true)});
     wait(n*220+1400,()=>{I.parcel.visible=false;I.armL.rotation.x=0;I.armR.rotation.x=0;cycles++;onState('done',cycles)});
     walkTo('desk',()=>{cur=null;WIN=null;drawBoard();onState('idle');drawMon(null)});
@@ -198,14 +223,14 @@ export function startOffice(o){
   if(zi){zi.onclick=()=>setZoom(tDist/1.2);zo.onclick=()=>setZoom(tDist*1.2);zr.onclick=()=>unfocus()}
   box.addEventListener('dblclick',()=>unfocus());
   box.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();setZoom(tDist*(e.deltaY<0?.9:1.1))},{passive:false});
-  box.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,.ballot,.status,.ctl'))return;drag={x:e.clientX,y:e.clientY,yaw:tYaw,pitch:tPitch,moved:false};box.setPointerCapture(e.pointerId)});
+  box.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,.panel,.status,.ctl,.strip'))return;drag={x:e.clientX,y:e.clientY,yaw:tYaw,pitch:tPitch,moved:false};box.setPointerCapture(e.pointerId)});
   box.addEventListener('pointermove',e=>{const r=box.getBoundingClientRect();mx=((e.clientX-r.left)/r.width-.5)*2;my=((e.clientY-r.top)/r.height-.5)*2;
     if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>3)drag.moved=true;tYaw=Math.max(-.2,Math.min(1.35,drag.yaw-dx*.006));tPitch=Math.max(.2,Math.min(1.1,drag.pitch+dy*.004));box.classList.add('drag')}});
-  const FOCUS=[{m:board,look:new THREE.Vector3(-.5,3.6,-6.9),dist:13,yaw:.15,pitch:.18,what:'board'},{m:scr,look:new THREE.Vector3(-7,2.4,0),dist:9,yaw:1.1,pitch:.25,what:'desk'},{m:cab,look:new THREE.Vector3(5.5,2.4,-6.4),dist:12,yaw:.3,pitch:.2,what:'holes'},{m:printer,look:new THREE.Vector3(-7.2,1.4,-4.6),dist:8,yaw:.9,pitch:.35,what:'printer'}];
+  const FOCUS=[{m:board,look:new THREE.Vector3(-.5,3.6,-6.9),dist:13,yaw:.15,pitch:.18,what:'board'},{m:scr,look:new THREE.Vector3(-6.5,2.3,0),dist:10,yaw:1.25,pitch:.22,what:'desk'},{m:cab,look:new THREE.Vector3(5.5,2.4,-6.4),dist:12,yaw:.3,pitch:.2,what:'holes'},{m:printer,look:new THREE.Vector3(-7.2,1.4,-4.6),dist:8,yaw:.9,pitch:.35,what:'printer'}];
   let focused=null;
   function pickFocus(cx,cy){const r=renderer.domElement.getBoundingClientRect();ndc.set(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);const hits=ray.intersectObjects(FOCUS.map(f=>f.m),true);if(!hits.length)return null;let o=hits[0].object;while(o){const f=FOCUS.find(f=>f.m===o);if(f)return f;o=o.parent}return null}
-  function focus(f){if(!f||focused===f){unfocus();return}focused=f;tLook.copy(f.look);tDist=f.dist*fit;tYaw=f.yaw;tPitch=f.pitch;box.classList.add('focus');const names={board:'the board',desk:'my desk',holes:'the holders',printer:'the printer'};onFocus(names[f.what])}
-  function unfocus(){focused=null;tLook.copy(HOME);tDist=baseDist();tYaw=.62;tPitch=.48;box.classList.remove('focus');onFocus(null)}
+  function focus(f){if(!f||focused===f){unfocus();return}focused=f;tLook.copy(f.look);tDist=f.dist*fit;tYaw=f.yaw;tPitch=f.pitch;box.classList.add('focus');ov.querySelectorAll('.hot').forEach(h=>h.classList.toggle('on',h.dataset.w===f.what));onFocus(f.what)}
+  function unfocus(){focused=null;tLook.copy(HOME);tDist=baseDist();tYaw=.62;tPitch=.48;box.classList.remove('focus');ov.querySelectorAll('.hot').forEach(h=>h.classList.remove('on'));onFocus(null)}
   const onFocus=o.onFocus||function(){};
   box.addEventListener('pointerup',e=>{if(drag&&!drag.moved){if(pickIntern(e.clientX,e.clientY)){say(cur?'busy':'waiting for the vote',1400);if(!cur&&!queue.length)idleTimer=1e9}else{const f=pickFocus(e.clientX,e.clientY);if(f)focus(f);else if(focused)unfocus()}}drag=null;box.classList.remove('drag')});
   box.addEventListener('pointermove',e=>{if(drag)return;const f=pickFocus(e.clientX,e.clientY);box.style.cursor=f?'pointer':''});
@@ -213,7 +238,7 @@ export function startOffice(o){
   const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
   function pickIntern(cx,cy){const r=renderer.domElement.getBoundingClientRect();ndc.set(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);return ray.intersectObject(I.g,true).length>0}
   function project(v){const p=v.clone().project(camera);const r=renderer.domElement.getBoundingClientRect(),br=box.getBoundingClientRect();return {x:(p.x+1)/2*r.width+(r.left-br.left),y:(1-p.y)/2*r.height+(r.top-br.top),z:p.z}}
-  function resize(){const w=box.clientWidth,h=box.clientHeight;renderer.setSize(w,h,false);renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';camera.aspect=w/h;camera.updateProjectionMatrix();const was=fit;fit=Math.max(1,1.15/camera.aspect);HOME.y=camera.aspect<.8?-1.4:1.5;if(!focused)tLook.copy(HOME);if(Math.abs(tDist-26*was)<.01||was!==fit)tDist=baseDist()}
+  function resize(){const w=box.clientWidth,h=box.clientHeight;renderer.setSize(w,h,false);renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';camera.aspect=w/h;camera.updateProjectionMatrix();const was=fit;fit=Math.max(1,1.08/camera.aspect);HOME.y=camera.aspect<.8?-1.6:1.5;HOME.x=camera.aspect<.8?.6:-.5;if(!focused)tLook.copy(HOME);if(Math.abs(tDist-26*was)<.01||was!==fit)tDist=baseDist()}
   resize();dist=tDist;addEventListener('resize',resize);
 
   // ---------- loop ----------
@@ -224,6 +249,7 @@ export function startOffice(o){
     if(!red){stepIntern(dt,ts);stepBoss(dt,ts)}
     // time of day: the window and the sun follow UTC
     {const h=new Date().getUTCHours()+new Date().getUTCMinutes()/60;const day=Math.max(0,Math.sin((h-6)/12*Math.PI));sun.intensity=.6+day*1.0;winMat.emissiveIntensity=.2+day*.35;winMat.color.setHex(day>.15?0xcfe6fb:0x2a3550);winMat.emissive.setHex(day>.15?0xcfe6fb:0x2a3550);lampMat.emissiveIntensity=day>.3?0:1.2;lampL.intensity=day>.3?0:2.2}
+    tickTex.offset.x=(ts/26000)%1;
     // clock
     const n=new Date();hS.rotation.z=-n.getUTCSeconds()/60*Math.PI*2;hM.rotation.z=-(n.getUTCMinutes()+n.getUTCSeconds()/60)/60*Math.PI*2;hH.rotation.z=-((n.getUTCHours()%12)+n.getUTCMinutes()/60)/12*Math.PI*2;
     // blink
@@ -232,11 +258,11 @@ export function startOffice(o){
     for(let i=parcels.length-1;i>=0;i--){const p=parcels[i];p.t+=dt/900;if(p.t<0)continue;if(!p.m){p.m=new THREE.Mesh(parcelGeo,mat.orange);p.m.castShadow=true;scene.add(p.m)}const k=Math.min(1,p.t);p.m.position.lerpVectors(p.a,p.b,k);p.m.position.y+=Math.sin(k*Math.PI)*2.2;p.m.rotation.x+=dt/300;if(k>=1){scene.remove(p.m);p.h.flash=1;parcels.splice(i,1)}}
     holes.forEach(h=>{if(h.flash>0){h.m.material.emissiveIntensity=h.flash*.9;h.flash=Math.max(0,h.flash-dt/900)}});
     if(slip.visible){slip.position.z=Math.min(.95,slip.position.z+dt/1200)}
-    ov.querySelectorAll('.msg').forEach(el=>{const v=new THREE.Vector3(+el.dataset.x,+el.dataset.y,+el.dataset.z);const p=project(v);el.style.left=p.x+'px';el.style.top=p.y+'px';el.style.opacity=(p.z>1)?0:''});
+    ov.querySelectorAll('.msg,.hot').forEach(el=>{const v=new THREE.Vector3(+el.dataset.x,+el.dataset.y,+el.dataset.z);const p=project(v);el.style.left=p.x+'px';el.style.top=p.y+'px';el.style.opacity=(p.z>1)?0:''});
     renderer.render(scene,camera);
     if(!(red&&frames>3))requestAnimationFrame(frame)}
   requestAnimationFrame(frame);
   document.addEventListener('visibilitychange',()=>{last=0});
 
-  return {set turbo(v){turbo=v},focus:(w)=>{const f=FOCUS.find(f=>f.what===w);if(f)focus(f)},unfocus,get focused(){return focused&&focused.what},runDay,voted:(tk)=>{drawBoard();if(!cur&&Math.random()<.5){I.head.rotation.y=Math.atan2(board.position.x-I.g.position.x,board.position.z-I.g.position.z)-I.g.rotation.y;setTimeout(()=>{I.head.rotation.y=0},1500)}pop(new THREE.Vector3(-.5,6.4,-6.8),'+1 '+tk,'plus',1400)},redraw:()=>{drawBoard();drawMon(null)},get busy(){return !!cur},get cycles(){return cycles},get zoom(){return tDist},intern:I,renderer};
+  return {receipts:RECEIPTS,dist:DIST,holes:holes,drawTV,set turbo(v){turbo=v},focus:(w)=>{const f=FOCUS.find(f=>f.what===w);if(f)focus(f)},unfocus,get focused(){return focused&&focused.what},runDay,voted:(tk)=>{drawBoard();if(!cur&&Math.random()<.5){I.head.rotation.y=Math.atan2(board.position.x-I.g.position.x,board.position.z-I.g.position.z)-I.g.rotation.y;setTimeout(()=>{I.head.rotation.y=0},1500)}pop(new THREE.Vector3(-.5,6.4,-6.8),'+1 '+tk,'plus',1400)},redraw:()=>{drawBoard();drawMon(null);drawTicker();drawTV(null)},get busy(){return !!cur},get cycles(){return cycles},get zoom(){return tDist},intern:I,renderer};
 }
